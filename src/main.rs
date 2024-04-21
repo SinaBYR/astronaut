@@ -11,6 +11,7 @@ struct Node {
 enum NodeType {
     Text(String),
     Element(ElementData),
+    Comment(String),
 }
 
 struct ElementData {
@@ -34,6 +35,13 @@ fn elem(tag_name: String, attributes: AttrMap, children: Vec<Node>) -> Node {
             tag_name,
             attributes
         }),
+    }
+}
+
+fn comment(text: String) -> Node {
+    Node {
+        children: Vec::new(),
+        node_type: NodeType::Comment(text),
     }
 }
 
@@ -84,13 +92,27 @@ impl Parser {
 
     fn parse_node(&mut self) -> Node {
         match self.next_char() {
-            '<' => self.parse_element(),
+            '<' => match self.starts_with("<!--") {
+                true => self.parse_comment(),
+                false => self.parse_element(),
+            },
             _   => self.parse_text(),
         }
     }
 
     fn parse_text(&mut self) -> Node {
         text(self.consume_while(|c| c != '<'))
+    }
+
+    fn parse_comment(&mut self) -> Node {
+        let mut comment_text = String::new();
+        loop {
+            if self.starts_with("-->") {
+                break;
+            }
+            comment_text.push(self.consume_char());
+        }
+        comment(comment_text)
     }
 
     fn parse_element(&mut self) -> Node {
