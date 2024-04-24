@@ -8,14 +8,9 @@ pub struct Rule {
 }
 
 pub struct Selector {
-    name: String,
-    selector_type: SelectorType
-}
-
-pub enum SelectorType {
-    Id,
-    Class,
-    Tag,
+    tag_name: Option<String>,
+    id: Option<String>,
+    class: Vec<String>,
 }
 
 pub struct Property {
@@ -71,38 +66,39 @@ impl Parser {
     //                  Selector Parsing
     // ---------------------------------------------
     // ---------------------------------------------
-    fn parse_id(&mut self) -> Selector {
+    fn parse_id(&mut self) -> String {
         self.consume_char(); // parses hashtag #
-        let selector_name = self.consume_while(|c| char::is_whitespace(c));
-        Selector {
-            name: selector_name,
-            selector_type: SelectorType::Id,
-        }
+        let id = self.consume_while(|c| !char::is_whitespace(c) || c != '.' || 'c' != '{');
+        id
     }
 
-    fn parse_class(&mut self) -> Selector {
+    fn parse_class(&mut self) -> String {
         self.consume_char(); // parses dot .
-        let selector_name = self.consume_while(|c| char::is_whitespace(c) || c == '.');
-        Selector {
-            name: selector_name,
-            selector_type: SelectorType::Class,
-        }
+        let class = self.consume_while(|c| !char::is_whitespace(c) || c != '.' || c != '#');
+        class
     }
 
-    fn parse_tag(&mut self) -> Selector {
-        let selector_name = self.consume_while(|c| char::is_whitespace(c) || c == '{');
-        Selector {
-            name: selector_name,
-            selector_type: SelectorType::Tag,
-        }
+    fn parse_tag(&mut self) -> String {
+        let tag_name = self.consume_while(|c| char::is_whitespace(c) || c == '{' || c == '#' || c == '.');
+        tag_name
     }
 
     fn parse_selector(&mut self) -> Selector {
-        match self.next_char() {
-            '#' => self.parse_id(),
-            '.' => self.parse_class(),
-            _   => self.parse_tag(),
+        let mut selector: Selector = Selector {tag_name: None, id: None, class: Vec::new()};
+        while !char::is_whitespace(self.next_char()) || self.next_char() != '{' {
+            match self.next_char() {
+                '#' => {
+                    selector.id = Some(self.parse_id());
+                }
+                '.' => {
+                    selector.class.push(self.parse_class());
+                }
+                _   => {
+                    selector.tag_name = Some(self.parse_tag());
+                },
+            }
         }
+        selector
     }
 
     // ---------------------------------------------
@@ -143,8 +139,7 @@ impl Parser {
             declarations
         }
     }
-    // "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-    // " #id { color: red; width: 25px; } .cls { color: red; } "
+
     fn parse_rules(&mut self) -> Vec<Rule> {
         self.consume_whitespace();
         let mut rules: Vec<Rule> = Vec::new();
