@@ -125,6 +125,7 @@ impl Parser {
         elem(tag_name, attributes, children)
     }
 
+    // TODO FIX THIS SHIT
     fn parse_attr_value(&mut self) -> (String, String) {
         let open_quote = self.consume_char();
         let name = self.parse_tag_name();
