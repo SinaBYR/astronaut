@@ -1,3 +1,6 @@
+// TODO add specifity support
+// TODO add is_numeric util
+
 pub struct StyleSheet {
     styles: Vec<Rule>,
 }
@@ -15,7 +18,24 @@ pub struct Selector {
 
 pub struct Property {
     name: String,
-    value: String,
+    value: Value,
+}
+
+pub enum Value {
+    Keyword(String),
+    Numeric(f32, Unit),
+    ColorValue(Color),
+}
+
+pub enum Unit {
+    Px,
+}
+
+pub struct Color {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
 }
 
 pub struct Parser {
@@ -59,6 +79,10 @@ impl Parser {
 
     fn consume_whitespace(&mut self) -> String {
         self.consume_while(|c| char::is_whitespace(c))
+    }
+
+    fn starts_with(&mut self, s: &str) -> bool {
+        self.input[self.pos..].starts_with(s)
     }
 
     // ---------------------------------------------
@@ -106,11 +130,45 @@ impl Parser {
     //                  Declarations Parsing
     // ---------------------------------------------
     // ---------------------------------------------
+    fn parse_rgba(&mut self) -> Color {
+        self.consume_while(|c| !char::is_numeric(c));                                   // parse rgba(
+
+        let r = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse red
+        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+
+        let g = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse green
+        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+
+        let b = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse blue
+        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+
+        let a = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse alpha
+        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+
+        Color { r, g, b, a }
+    }
+
+    fn parse_value(&mut self) -> Value {
+        if char::is_numeric(self.next_char()) {
+            let numeric_value = self.consume_while(|c| char::is_numeric(c)).parse::<f32>().unwrap();
+            // TODO: didn't parse unit because we are expecting px for now
+            // let unit_value = self.consume_while(|c| c != ';' || !c.is_whitespace());
+            Value::Numeric(numeric_value, Unit::Px)
+        } else if self.starts_with("rgba(") {
+            let color = self.parse_rgba();
+            Value::ColorValue(Color { r: color.r, g: color.g, b: color.b, a: color.a })
+        } else {
+            let keyword_value = self.consume_while(|c| c != ';' || !c.is_whitespace());
+            Value::Keyword(keyword_value)
+        }
+    }
+
     fn parse_property(&mut self) -> Property {
         let property_name = self.consume_while(|c| c != ':');
         self.consume_char(); // consume :
         self.consume_whitespace();
-        let property_value = self.consume_while(|c| c != ';');
+        let property_value = self.parse_value();
+        self.consume_whitespace();
         self.consume_char(); // consume ;
         Property {
             name: property_name,
