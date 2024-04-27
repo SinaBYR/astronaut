@@ -131,26 +131,26 @@ impl Parser {
     // ---------------------------------------------
     // ---------------------------------------------
     fn parse_rgba(&mut self) -> Color {
-        self.consume_while(|c| !char::is_numeric(c));                                   // parse rgba(
+        self.consume_while(|c| !c.is_numeric());                                   // parse rgba(
 
-        let r = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse red
-        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+        let r = self.consume_while(|c| c.is_numeric()).parse::<u8>().unwrap();     // parse red
+        self.consume_while(|c| !c.is_numeric());                                   // parse whitespace and comma
 
-        let g = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse green
-        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+        let g = self.consume_while(|c| c.is_numeric()).parse::<u8>().unwrap();     // parse green
+        self.consume_while(|c| !c.is_numeric());                                   // parse whitespace and comma
 
-        let b = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse blue
-        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+        let b = self.consume_while(|c| c.is_numeric()).parse::<u8>().unwrap();     // parse blue
+        self.consume_while(|c| !c.is_numeric());                                   // parse whitespace and comma
 
-        let a = self.consume_while(|c| char::is_numeric(c)).parse::<u8>().unwrap();     // parse alpha
-        self.consume_while(|c| !char::is_numeric(c));                                   // parse whitespace and comma
+        let a = self.consume_while(|c| c.is_numeric()).parse::<u8>().unwrap();     // parse alpha
+        self.consume_while(|c| !c.is_numeric());                                   // parse whitespace and comma
 
         Color { r, g, b, a }
     }
 
     fn parse_value(&mut self) -> Value {
         if char::is_numeric(self.next_char()) {
-            let numeric_value = self.consume_while(|c| char::is_numeric(c)).parse::<f32>().unwrap();
+            let numeric_value = self.consume_while(|c| c.is_numeric()).parse::<f32>().unwrap();
             // TODO: didn't parse unit because we are expecting px for now
             // let unit_value = self.consume_while(|c| c != ';' || !c.is_whitespace());
             Value::Numeric(numeric_value, Unit::Px)
