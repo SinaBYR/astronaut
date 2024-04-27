@@ -1,13 +1,12 @@
-use std::{char, collections::HashMap};
-
-use parsers::html;
+use parsers::{
+    html,
+    css,
+};
 
 pub mod parsers;
 
 fn main() {
-    // <div>
-    //     <p>hello</p>
-    //     world
-    // </div>
-    let root = parsers::html::parse(String::from("<html><p id=\"123\">Hello world</p></html>"));
+    let root = parsers::html::parse(String::from("<div><p id=\"hello\">Hello world</p></div>"));
+    let rules = parsers::css::parse(String::from("#hello { display: block; width: 250px; }")).rules;
 }
+
