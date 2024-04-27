@@ -2,7 +2,7 @@
 // TODO add is_numeric util
 
 pub struct StyleSheet {
-    styles: Vec<Rule>,
+    rules: Vec<Rule>,
 }
 
 pub struct Rule {
@@ -207,11 +207,17 @@ impl Parser {
         }
         rules
     }
+}
 
-    fn parse_stylesheet(&mut self) -> StyleSheet {
-        StyleSheet {
-            styles: self.parse_rules(),
-        }
+pub fn parse(source: String) -> StyleSheet {
+    let rules = Parser {
+        pos: 0,
+        input: source,
+    }
+    .parse_rules();
+
+    StyleSheet {
+        rules,
     }
 }
 
