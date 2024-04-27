@@ -2,23 +2,23 @@
 // TODO add is_numeric util
 
 pub struct StyleSheet {
-    rules: Vec<Rule>,
+    pub rules: Vec<Rule>,
 }
 
 pub struct Rule {
-    selector: Selector,
-    declarations: Vec<Property>,
+    pub selector: Selector,
+    pub declarations: Vec<Property>,
 }
 
 pub struct Selector {
-    tag_name: Option<String>,
-    id: Option<String>,
-    class: Vec<String>,
+    pub tag_name: Option<String>,
+    pub id: Option<String>,
+    pub class: Vec<String>,
 }
 
 pub struct Property {
-    name: String,
-    value: Value,
+    pub name: String,
+    pub value: Value,
 }
 
 pub enum Value {
@@ -32,10 +32,10 @@ pub enum Unit {
 }
 
 pub struct Color {
-    r: u8,
-    g: u8,
-    b: u8,
-    a: u8,
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
 }
 
 pub struct Parser {
