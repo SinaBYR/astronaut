@@ -10,6 +10,29 @@ struct StyledNode<'a> {
     children: Vec<StyledNode<'a>>,
 }
 
+enum Display {
+    Block,
+    Inline,
+    None,
+}
+
+impl StyledNode<'_> {
+    pub fn value(&self, name: &str) -> Option<Value> {
+        self.css_properties.get(name).map(|v| v.clone())
+    }
+
+    pub fn display(&self) -> Display {
+        match self.value("display") {
+            Some(Value::Keyword(s)) => match &*s {
+                "block" => Display::Block,
+                "none"  => Display::None,
+                _       => Display::Inline,
+            },
+            _ => Display::Inline,
+        }
+    }
+}
+
 fn matches_selector(elem: &ElementData, selector: &Selector) -> bool {
     // if we had more selector types, we would've used matches syntax
 
