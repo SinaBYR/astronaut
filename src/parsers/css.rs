@@ -21,16 +21,20 @@ pub struct Property {
     pub value: Value,
 }
 
+#[derive(Clone)]
 pub enum Value {
     Keyword(String),
     Numeric(f32, Unit),
     ColorValue(Color),
 }
 
+
+#[derive(Clone)]
 pub enum Unit {
     Px,
 }
 
+#[derive(Clone)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
