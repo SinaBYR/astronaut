@@ -4,13 +4,13 @@ use super::{css::{Rule, Selector, StyleSheet, Value}, html::{ElementData, Node, 
 
 type PropertyMap = HashMap<String, Value>;
 
-struct StyledNode<'a> {
+pub struct StyledNode<'a> {
     node: &'a Node,
     css_properties: PropertyMap,
-    children: Vec<StyledNode<'a>>,
+    pub children: Vec<StyledNode<'a>>,
 }
 
-enum Display {
+pub enum Display {
     Block,
     Inline,
     None,
