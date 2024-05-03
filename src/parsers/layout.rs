@@ -30,13 +30,19 @@ struct EdgeSizes {
     bottom: f32,
 }
 
-struct LayoutBox {
+struct LayoutBox<'a> {
     dimensions: Dimensions,
-    box_type: BoxType,
-    children: Vec<LayoutBox>,
+    box_type: BoxType<'a>,
+    children: Vec<LayoutBox<'a>>,
 }
 
-impl LayoutBox {
+enum BoxType<'a> {
+    Block(&'a StyledNode<'a>),
+    Inline(&'a StyledNode<'a>),
+    Anonymous,
+}
+
+impl<'a> LayoutBox<'a> {
     fn new(box_type: BoxType) -> LayoutBox {
         LayoutBox {
             dimensions: Default::default(),
@@ -45,10 +51,10 @@ impl LayoutBox {
         }
     }
 
-    fn generate_anonymous_box(&mut self) -> &mut LayoutBox {
+    fn generate_anonymous_box(&mut self) -> &mut LayoutBox<'a> {
         match self.box_type {
-            BoxType::Inline | BoxType::Anonymous => self,
-            BoxType::Block => {
+            BoxType::Inline(_) | BoxType::Anonymous => self,
+            BoxType::Block(_) => {
                 match self.children.last() {
                     Some(LayoutBox { box_type: BoxType::Anonymous, .. }) => {},
                     _ => self.children.push(LayoutBox::new(BoxType::Anonymous)),
@@ -59,16 +65,10 @@ impl LayoutBox {
     }
 }
 
-enum BoxType {
-    Block,
-    Inline,
-    Anonymous,
-}
-
-fn build_layout_tree(style_node: &StyledNode) -> LayoutBox {
+fn build_layout_tree<'a>(style_node: &'a StyledNode) -> LayoutBox<'a> {
     let mut root = LayoutBox::new(match style_node.display() {
-        Display::Block  => BoxType::Block,
-        Display::Inline => BoxType::Inline,
+        Display::Block  => BoxType::Block(style_node),
+        Display::Inline => BoxType::Inline(style_node),
         Display::None   => panic!("root node has display: none;"),
     });
 
